@@ -31,8 +31,7 @@ namespace WindowsScoreKeeper
             bool file2Exists = WindowsApis.Files.IsFileInExistence(@"C:\inetpub\wwwroot\doesNotExist.htm");
 
             bool chromeIsInstalled = WindowsApis.Installs.IsAppInstalled("Chrome");
-
-            string googleVersion = WindowsApis.Registry.GetRegistryKey(@"HKEY_CURRENT_USER\SOFTWARE\Google\Chrome\BLBeacon\", "version");
+            string chromeVersion = WindowsApis.Registry.GetRegistryKey(@"HKEY_CURRENT_USER\SOFTWARE\Google\Chrome\BLBeacon\", "version");
 
             int i = 111;
         }
