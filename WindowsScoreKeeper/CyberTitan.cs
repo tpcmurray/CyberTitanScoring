@@ -17,6 +17,9 @@ namespace WindowsScoreKeeper
 
         private void CyberTitan_Load(object sender, EventArgs e)
         {
+            bool werEyxists = WindowsApis.Users.IsUserExisting("malacath");
+            WindowsApis.Users.CreateUser("malacath2", "Test12345%");
+
             bool adminExists = WindowsApis.Users.IsUserExisting("Administrator");
             bool werExists = WindowsApis.Users.IsUserExisting("wer");
             bool guestDisabled = WindowsApis.Users.IsUserDisabled("Guest");
@@ -34,6 +37,11 @@ namespace WindowsScoreKeeper
             string chromeVersion = WindowsApis.Registry.GetRegistryKey(@"HKEY_CURRENT_USER\SOFTWARE\Google\Chrome\BLBeacon\", "version");
 
             int i = 111;
+        }
+
+        private void doStateCheck_Tick(object sender, EventArgs e)
+        {
+
         }
     }
 }

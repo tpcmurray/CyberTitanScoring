@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.DirectoryServices;
 using System.DirectoryServices.ActiveDirectory;
 using System.Linq;
 using System.Management;
@@ -35,6 +36,46 @@ namespace WindowsApis
                 "partcomponent='Win32_UserAccount.Domain=\"{0}\",Name=\"{1}\"'", localDomain, username));
             var users = searcher.Get();
             return users.Count > 0;
+        }
+
+        public static bool CreateUser(string username, string password)
+        {
+            try
+            {
+                DirectoryEntry AD = new DirectoryEntry("WinNT://" + Environment.MachineName + ",computer");
+                DirectoryEntry NewUser = AD.Children.Add(username, "user");
+                NewUser.Invoke("SetPassword", new object[] { password });
+                NewUser.Invoke("Put", new object[] { "Description", "Cyber Titan User" });
+                NewUser.CommitChanges();
+                DirectoryEntry grp;
+
+                grp = AD.Children.Find("Users", "group");
+                if (grp != null) { grp.Invoke("Add", new object[] { NewUser.Path.ToString() }); }
+            } 
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return true;
+        }
+
+        public static bool MakeUserAdmin(string username)
+        {
+            return true;
+        }
+        public static bool MakeUserNonAdmin(string username)
+        {
+            return true;
+        }
+
+        public static bool DeleteUser(string username)
+        {
+            return true;
+        }
+
+        public static bool SetPassword(string username, string password)
+        {
+            return true;
         }
     }
 }

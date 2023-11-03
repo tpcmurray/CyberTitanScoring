@@ -28,18 +28,20 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CyberTitan));
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.lRunningTime = new System.Windows.Forms.Label();
             this.lPoints = new System.Windows.Forms.Label();
+            this.doStateCheck = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
             // 
             // label1
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Calibri", 19.75F, System.Drawing.FontStyle.Bold);
-            this.label1.Location = new System.Drawing.Point(108, 24);
+            this.label1.Location = new System.Drawing.Point(131, 24);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(509, 33);
             this.label1.TabIndex = 0;
@@ -49,7 +51,7 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Calibri", 12.75F, System.Drawing.FontStyle.Bold);
-            this.label2.Location = new System.Drawing.Point(181, 70);
+            this.label2.Location = new System.Drawing.Point(204, 70);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(258, 21);
             this.label2.TabIndex = 1;
@@ -59,7 +61,7 @@
             // 
             this.lRunningTime.AutoSize = true;
             this.lRunningTime.Font = new System.Drawing.Font("Calibri", 12.75F, System.Drawing.FontStyle.Bold);
-            this.lRunningTime.Location = new System.Drawing.Point(445, 70);
+            this.lRunningTime.Location = new System.Drawing.Point(468, 70);
             this.lRunningTime.Name = "lRunningTime";
             this.lRunningTime.Size = new System.Drawing.Size(65, 21);
             this.lRunningTime.TabIndex = 2;
@@ -69,11 +71,15 @@
             // 
             this.lPoints.AutoSize = true;
             this.lPoints.Font = new System.Drawing.Font("Calibri", 19.75F, System.Drawing.FontStyle.Bold);
-            this.lPoints.Location = new System.Drawing.Point(180, 102);
+            this.lPoints.Location = new System.Drawing.Point(203, 102);
             this.lPoints.Name = "lPoints";
             this.lPoints.Size = new System.Drawing.Size(330, 33);
             this.lPoints.TabIndex = 3;
             this.lPoints.Text = "0 out of 100 points received";
+            // 
+            // doStateCheck
+            // 
+            this.doStateCheck.Tick += new System.EventHandler(this.doStateCheck_Tick);
             // 
             // CyberTitan
             // 
@@ -100,6 +106,7 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label lRunningTime;
         private System.Windows.Forms.Label lPoints;
+        private System.Windows.Forms.Timer doStateCheck;
     }
 }
 

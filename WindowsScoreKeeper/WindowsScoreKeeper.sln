@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowsScoreKeeper", "Windo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowsApis", "..\WindowsApis\WindowsApis.csproj", "{A487C740-372F-4C8D-9CE2-114EBC0703E4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VulnerabilityTracker", "..\VulnerabilityTracker\VulnerabilityTracker.csproj", "{69B9FB04-DB74-4D49-B74F-3418ECAA2685}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{A487C740-372F-4C8D-9CE2-114EBC0703E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A487C740-372F-4C8D-9CE2-114EBC0703E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A487C740-372F-4C8D-9CE2-114EBC0703E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69B9FB04-DB74-4D49-B74F-3418ECAA2685}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69B9FB04-DB74-4D49-B74F-3418ECAA2685}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69B9FB04-DB74-4D49-B74F-3418ECAA2685}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69B9FB04-DB74-4D49-B74F-3418ECAA2685}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
