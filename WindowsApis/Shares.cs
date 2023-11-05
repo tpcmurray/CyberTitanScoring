@@ -16,7 +16,6 @@ namespace WindowsApis
         {
             ManagementClass managementClass = new ManagementClass("Win32_Share");
             ManagementBaseObject inParams = managementClass.GetMethodParameters("Create");
-            ManagementBaseObject outParams;
             inParams["Name"] = shareName;
             inParams["Path"] = sharePath;
             inParams["Type"] = shareType;
