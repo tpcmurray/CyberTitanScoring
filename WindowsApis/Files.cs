@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace WindowsApis
 {
@@ -12,6 +8,20 @@ namespace WindowsApis
         public static bool IsFileInExistence(string fileAndPath)
         {
             return File.Exists(fileAndPath);
+        }
+
+        public static List<string> ReadInTextFile(string filePath)
+        {
+            List<string> lines = new List<string>();
+            StreamReader reader = File.OpenText(filePath);
+            string line;
+
+            while ((line = reader.ReadLine()) != null)
+            {
+                lines.Add(line);
+            }
+
+            return lines;
         }
     }
 }

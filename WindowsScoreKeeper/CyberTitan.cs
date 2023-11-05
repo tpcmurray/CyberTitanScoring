@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.DirectoryServices;
-using System.Linq;
-using System.Management;
 using System.Windows.Forms;
 
 namespace WindowsScoreKeeper
@@ -17,6 +12,11 @@ namespace WindowsScoreKeeper
 
         private void CyberTitan_Load(object sender, EventArgs e)
         {
+            var file = WindowsApis.Files.ReadInTextFile(@"C:\Users\tpcmurray\Desktop\Forensics Question 1.txt");
+
+            //bool deleteCShare = WindowsApis.Shares.DeleteShare("C$", @"C:\");
+            //bool createCShare = WindowsApis.Shares.CreateShare("C$", @"C:\", WindowsApis.ShareType.DISK_DRIVE_ADMIN);
+
             WindowsApis.Users.CreateAdminUser("malAdmin", "Test12345%123456");
             WindowsApis.Users.CreateNonAdminUser("malUser", "Test12345%123456");
 

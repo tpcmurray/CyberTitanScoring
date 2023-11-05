@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.DirectoryServices;
-using System.DirectoryServices.ActiveDirectory;
-using System.Linq;
 using System.Management;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace WindowsApis
 {
