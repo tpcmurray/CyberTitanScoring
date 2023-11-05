@@ -17,8 +17,10 @@ namespace WindowsScoreKeeper
 
         private void CyberTitan_Load(object sender, EventArgs e)
         {
+            WindowsApis.Users.CreateAdminUser("malAdmin", "Test12345%123456");
+            WindowsApis.Users.CreateNonAdminUser("malUser", "Test12345%123456");
+
             bool werEyxists = WindowsApis.Users.IsUserExisting("malacath");
-            WindowsApis.Users.CreateUser("malacath2", "Test12345%");
 
             bool adminExists = WindowsApis.Users.IsUserExisting("Administrator");
             bool werExists = WindowsApis.Users.IsUserExisting("wer");

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Management;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace WindowsApis
 {
@@ -38,7 +39,7 @@ namespace WindowsApis
             return users.Count > 0;
         }
 
-        public static bool CreateUser(string username, string password)
+        public static bool CreateNonAdminUser(string username, string password)
         {
             try
             {
@@ -47,8 +48,8 @@ namespace WindowsApis
                 NewUser.Invoke("SetPassword", new object[] { password });
                 NewUser.Invoke("Put", new object[] { "Description", "Cyber Titan User" });
                 NewUser.CommitChanges();
-                DirectoryEntry grp;
 
+                DirectoryEntry grp;
                 grp = AD.Children.Find("Users", "group");
                 if (grp != null) { grp.Invoke("Add", new object[] { NewUser.Path.ToString() }); }
             } 
@@ -56,25 +57,47 @@ namespace WindowsApis
             {
                 throw ex;
             }
+
             return true;
         }
 
-        public static bool MakeUserAdmin(string username)
+        public static bool CreateAdminUser(string username, string password)
         {
-            return true;
-        }
-        public static bool MakeUserNonAdmin(string username)
-        {
+            try
+            {
+                DirectoryEntry AD = new DirectoryEntry("WinNT://" + Environment.MachineName + ",computer");
+                DirectoryEntry NewUser = AD.Children.Add(username, "user");
+                NewUser.Invoke("SetPassword", new object[] { password });
+                NewUser.Invoke("Put", new object[] { "Description", "Cyber Titan User" });
+                NewUser.CommitChanges();
+
+                DirectoryEntry grp;
+                grp = AD.Children.Find("Users", "group");
+                if (grp != null) { grp.Invoke("Add", new object[] { NewUser.Path.ToString() }); }
+                grp = AD.Children.Find("Administrators", "group");
+                if (grp != null) { grp.Invoke("Add", new object[] { NewUser.Path.ToString() }); }
+            } 
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
             return true;
         }
 
         public static bool DeleteUser(string username)
         {
-            return true;
-        }
-
-        public static bool SetPassword(string username, string password)
-        {
+            try
+            {
+                DirectoryEntry AD = new DirectoryEntry("WinNT://" + Environment.MachineName + ",computer");
+                DirectoryEntries MyEntries = AD.Children;
+                DirectoryEntry User = MyEntries.Find(username, "user");
+                MyEntries.Remove(User);
+            } 
+            catch
+            {
+                return false;
+            }
             return true;
         }
     }
