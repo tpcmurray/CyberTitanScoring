@@ -17,6 +17,7 @@ namespace AccountRectifier
 
             Console.WriteLine(" - Reading text files ...");
             List<string> adminList = ReadFile("admins.txt");
+            if (!adminList.Contains("Administrator")) adminList.Add("Administrator");
             List<string> userList = ReadFile("users.txt");
             Console.WriteLine("    - Desired Admins: " + String.Join(", ", adminList.Select(x => x.ToString().Trim()).ToArray()));
             Console.WriteLine("    - Desired Users: " + String.Join(", ", userList.Select(x => x.ToString().Trim()).ToArray()));
