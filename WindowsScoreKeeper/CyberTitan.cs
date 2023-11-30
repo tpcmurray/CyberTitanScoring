@@ -12,6 +12,8 @@ namespace WindowsScoreKeeper
 
         private void CyberTitan_Load(object sender, EventArgs e)
         {
+            bool userDisabled = WindowsApis.Users.DisableUser("Guest");
+
             var file = WindowsApis.Files.ReadInTextFile(@"C:\Users\tpcmurray\Desktop\Forensics Question 1.txt");
 
             //bool deleteCShare = WindowsApis.Shares.DeleteShare("C$", @"C:\");

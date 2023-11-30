@@ -94,5 +94,39 @@ namespace WindowsApis
             }
             return true;
         }
+
+        public static bool EnableUser(string username)
+        {
+            try
+            {
+                DirectoryEntry AD = new DirectoryEntry("WinNT://" + Environment.MachineName + ",computer");
+                DirectoryEntries MyEntries = AD.Children;
+                DirectoryEntry User = MyEntries.Find(username, "user");
+                User.Properties["UserFlags"].Value = (int)User.Properties["UserFlags"].Value & ~0x0002;
+                User.CommitChanges();
+                User.Close();
+            } catch
+            {
+                return false;
+            }
+            return true;
+        }
+
+        public static bool DisableUser(string username)
+        {
+            try
+            {
+                DirectoryEntry AD = new DirectoryEntry("WinNT://" + Environment.MachineName + ",computer");
+                DirectoryEntries MyEntries = AD.Children;
+                DirectoryEntry User = MyEntries.Find(username, "user");
+                User.Properties["UserFlags"].Value = (int)User.Properties["UserFlags"].Value | 0x0002;
+                User.CommitChanges();
+                User.Close();
+            } catch
+            {
+                return false;
+            }
+            return true;
+        }
     }
 }
