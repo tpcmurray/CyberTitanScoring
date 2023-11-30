@@ -5,6 +5,7 @@ using System.Management;
 using System.IO;
 using System.Linq;
 using System.Collections;
+using System.DirectoryServices.AccountManagement;
 
 namespace AccountRectifier
 {
@@ -17,16 +18,19 @@ namespace AccountRectifier
             Console.WriteLine(" - Reading text files ...");
             List<string> adminList = ReadFile("admins.txt");
             List<string> userList = ReadFile("users.txt");
+            Console.WriteLine("    - Desired Admins: " + String.Join(", ", adminList.Select(x => x.ToString().Trim()).ToArray()));
+            Console.WriteLine("    - Desired Users: " + String.Join(", ", userList.Select(x => x.ToString().Trim()).ToArray()));
 
             DirectoryEntry localMachine = new DirectoryEntry("WinNT://" + Environment.MachineName);
 
+            Console.WriteLine(" - Reading account data ...");
             List<string> currentAdmins = GetWindowsAdministrators(localMachine);
             List<string> currentUsers = GetWindowsUsers(currentAdmins, localMachine);
 
-            UpdateWindowsAdministrators(currentAdmins, adminList);
-            UpdateWindowsUsers(currentUsers, userList);
+            Console.WriteLine();
+            UpdateUsers(adminList, userList, currentAdmins, currentUsers);
 
-            Console.WriteLine("Windows 10 user and admin lists have been synchronized.");
+            Console.WriteLine(" - Windows user and admin lists have been synchronized.");
             Console.ReadLine();
         }
 
@@ -44,7 +48,6 @@ namespace AccountRectifier
 
         static List<string> GetWindowsAdministrators(DirectoryEntry localMachine)
         {
-            Console.WriteLine(" - Finding existing admins ...");
             List<string> admins = new List<string>();
 
             DirectoryEntry admGroup = localMachine.Children.Find("administrators", "group");
@@ -55,13 +58,12 @@ namespace AccountRectifier
                 admins.Add(member.Name);
             }
 
-            Console.WriteLine("    - Found: " + String.Join(",", admins.Select(x => x.ToString()).ToArray()));
+            Console.WriteLine("    - Existing admins: " + String.Join(", ", admins.Select(x => x.ToString()).ToArray()));
             return admins;
         }
 
         static List<string> GetWindowsUsers(List<string> currentAdmins, DirectoryEntry localMachine)
         {
-            Console.WriteLine(" - Finding existing users ...");
             List<string> users = new List<string>();
 
             DirectoryEntry admGroup = localMachine.Children.Find("users", "group");
@@ -75,98 +77,159 @@ namespace AccountRectifier
                 }
             }
 
-            Console.WriteLine("    - Found: " + String.Join(",", users.Select(x => x.ToString()).ToArray()));
+            Console.WriteLine("    - Existing users: " + String.Join(", ", users.Select(x => x.ToString()).ToArray()));
             return users;
         }
 
-        static void UpdateWindowsUsers(List<string> currentUsers, List<string> desiredUsers)
+        static void UpdateUsers(List<string> adminList, List<string> userList, List<string> currentAdmins, List<string> currentUsers)
         {
-            AddMissingUsers(currentUsers, desiredUsers);
-            RemoveExtraUsers(currentUsers, desiredUsers);
-        }
+            Console.WriteLine(" - Fixing accounts ...");
 
-        static void AddMissingUsers(List<string> currentUsers, List<string> desiredUsers)
-        {
-            var usersToAdd = desiredUsers.Except(currentUsers).ToList();
+            // admin missing: add or promote
+            foreach (string admin in adminList) { 
+                if (!currentAdmins.Contains(admin))
+                {
+                    if (currentUsers.Contains(admin))
+                    {
+                        Console.WriteLine("    - Promoting user to admin: " + admin);
+                        AddUserToAdminGroup(admin);
+                    } else
+                    {
+                        Console.WriteLine("    - Creating new admin: " + admin);
+                        CreateAdminUser(admin, "1234!@#$bbUU");
+                    }
+                }
+            }
 
-            foreach (var user in usersToAdd)
+            // admin and shouldn't exist: disable or demote
+            foreach (string admin in currentAdmins)
             {
-                // Implement logic to add user to Windows
-                CreateUser(user);
-                Console.WriteLine($"Adding user: {user}");
+                if (!adminList.Contains(admin))
+                {
+                    if (currentUsers.Contains(admin))
+                    {
+                        Console.WriteLine("    - Demote admin to user: " + admin);
+                        RemoveUserFromAdminGroup(admin);
+                    } else
+                    {
+                        Console.WriteLine("    - Disabling admin: " + admin);
+                        RemoveUserFromAdminGroup(admin);
+                        DisableUser(admin);
+                    }
+                }
+            }
+
+            // user missing: add or demote
+            foreach (string user in userList)
+            {
+                if (!currentUsers.Contains(user))
+                {
+                    if (currentAdmins.Contains(user))
+                    {
+                        Console.WriteLine("    - Removing user from admins: " + user);
+                        RemoveUserFromAdminGroup(user);
+                    } else
+                    {
+                        Console.WriteLine("    - Creating new user: " + user);
+                        CreateNonAdminUser(user, "1234!@#$bbUU");
+                    }
+                }
+            }
+
+            // userand shouldn't exist: disable 
+            foreach (string user in currentUsers)
+            {
+                if (!userList.Contains(user))
+                {
+                    Console.WriteLine("    - Disabling user: " + user);
+                    DisableUser(user);
+                }
             }
         }
 
-        static void RemoveExtraUsers(List<string> currentUsers, List<string> desiredUsers)
+        public static bool CreateAdminUser(string username, string password)
         {
-            var usersToRemove = currentUsers.Except(desiredUsers).ToList();
-
-            foreach (var user in usersToRemove)
+            try
             {
-                // Implement logic to remove user from Windows
-                DeleteUser(user);
-                Console.WriteLine($"Removing user: {user}");
-            }
-        }
+                DirectoryEntry AD = new DirectoryEntry("WinNT://" + Environment.MachineName + ",computer");
+                DirectoryEntry NewUser = AD.Children.Add(username, "user");
+                NewUser.Invoke("SetPassword", new object[] { password });
+                NewUser.Invoke("Put", new object[] { "Description", "Cyber Titan User" });
+                NewUser.CommitChanges();
 
-        static void UpdateWindowsAdministrators(List<string> currentAdmins, List<string> desiredAdmins)
-        {
-            AddMissingAdmins(currentAdmins, desiredAdmins);
-            RemoveExtraAdmins(currentAdmins, desiredAdmins);
-        }
-
-        static void AddMissingAdmins(List<string> currentAdmins, List<string> desiredAdmins)
-        {
-            var adminsToAdd = desiredAdmins.Except(currentAdmins).ToList();
-
-            foreach (var admin in adminsToAdd)
+                DirectoryEntry grp;
+                grp = AD.Children.Find("Users", "group");
+                if (grp != null) { grp.Invoke("Add", new object[] { NewUser.Path.ToString() }); }
+                grp = AD.Children.Find("Administrators", "group");
+                if (grp != null) { grp.Invoke("Add", new object[] { NewUser.Path.ToString() }); }
+            } catch (Exception ex)
             {
-                // Implement logic to add admin to Windows administrators group
-                AddUserToAdministratorsGroup(admin);
-                Console.WriteLine($"Adding admin: {admin}");
+                throw ex;
             }
+
+            return true;
         }
 
-        static void RemoveExtraAdmins(List<string> currentAdmins, List<string> desiredAdmins)
+        public static bool CreateNonAdminUser(string username, string password)
         {
-            var adminsToRemove = currentAdmins.Except(desiredAdmins).ToList();
-
-            foreach (var admin in adminsToRemove)
+            try
             {
-                // Implement logic to remove admin from Windows administrators group
-                RemoveUserFromAdministratorsGroup(admin);
-                Console.WriteLine($"Removing admin: {admin}");
+                DirectoryEntry AD = new DirectoryEntry("WinNT://" + Environment.MachineName + ",computer");
+                DirectoryEntry NewUser = AD.Children.Add(username, "user");
+                NewUser.Invoke("SetPassword", new object[] { password });
+                NewUser.Invoke("Put", new object[] { "Description", "Cyber Titan User" });
+                NewUser.CommitChanges();
+
+                DirectoryEntry grp;
+                grp = AD.Children.Find("Users", "group");
+                if (grp != null) { grp.Invoke("Add", new object[] { NewUser.Path.ToString() }); }
+            } catch (Exception ex)
+            {
+                throw ex;
             }
+
+            return true;
         }
 
-        // Helper methods for user and administrator management
-
-        static void CreateUser(string username)
+        public static bool DisableUser(string username)
         {
-            // Implement logic to create a new user
-            // For demonstration purposes, let's print a message
-            Console.WriteLine($"Creating user: {username}");
+            try
+            {
+                DirectoryEntry AD = new DirectoryEntry("WinNT://" + Environment.MachineName + ",computer");
+                DirectoryEntries MyEntries = AD.Children;
+                DirectoryEntry User = MyEntries.Find(username, "user");
+                User.Properties["UserFlags"].Value = (int)User.Properties["UserFlags"].Value | 0x0002;
+                User.CommitChanges();
+                User.Close();
+            } catch
+            {
+                return false;
+            }
+            return true;
         }
 
-        static void DeleteUser(string username)
+        public static bool RemoveUserFromAdminGroup(string username)
         {
-            // Implement logic to delete a user
-            // For demonstration purposes, let's print a message
-            Console.WriteLine($"Deleting user: {username}");
+            using (PrincipalContext pc = new PrincipalContext(ContextType.Machine, null))
+            {
+                GroupPrincipal group = GroupPrincipal.FindByIdentity(pc, "Administrators");
+                group.Members.Remove(pc, IdentityType.Name, username);
+                group.Save();
+            }
+
+            return true;
         }
 
-        static void AddUserToAdministratorsGroup(string username)
+        public static bool AddUserToAdminGroup(string username)
         {
-            // Implement logic to add a user to the administrators group
-            // For demonstration purposes, let's print a message
-            Console.WriteLine($"Adding user to administrators group: {username}");
-        }
+            using (PrincipalContext pc = new PrincipalContext(ContextType.Machine, null))
+            {
+                GroupPrincipal group = GroupPrincipal.FindByIdentity(pc, "Administrators");
+                group.Members.Add(pc,IdentityType.Name, username);
+                group.Save();
+            }
 
-        static void RemoveUserFromAdministratorsGroup(string username)
-        {
-            // Implement logic to remove a user from the administrators group
-            // For demonstration purposes, let's print a message
-            Console.WriteLine($"Removing user from administrators group: {username}");
+            return true;
         }
     }
 }

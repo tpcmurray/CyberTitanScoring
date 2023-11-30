@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.DirectoryServices;
 using System.Management;
+using System.Runtime;
 
 namespace WindowsApis
 {
@@ -126,6 +128,44 @@ namespace WindowsApis
             {
                 return false;
             }
+            return true;
+        }
+
+        public static bool RemoveUserFromAdminGroup(string username)
+        {
+            DirectoryEntry localMachine = new DirectoryEntry("WinNT://" + Environment.MachineName + ",computer");
+            DirectoryEntry group = localMachine.Children.Find("administrators", "group");
+            object members = group.Invoke("members", null);
+
+            foreach (object groupMember in (IEnumerable)members)
+            {
+                DirectoryEntry member = new DirectoryEntry(groupMember);
+                if (member.Name == username)
+                    group.Invoke("Remove", new[] { member.Path });
+            }
+
+            group.CommitChanges();
+            group.Dispose();
+
+            return true;
+        }
+
+        public static bool AddUserToAdminGroup(string username)
+        {
+            DirectoryEntry localMachine = new DirectoryEntry("WinNT://" + Environment.MachineName + ",computer");
+            DirectoryEntry group = localMachine.Children.Find("users", "group");
+            object members = group.Invoke("members", null);
+
+            foreach (object groupMember in (IEnumerable)members)
+            {
+                DirectoryEntry member = new DirectoryEntry(groupMember);
+                if (member.Name == username)
+                    group.Invoke("Add", new[] { member.Path });
+            }
+
+            group.CommitChanges();
+            group.Dispose();
+
             return true;
         }
     }
