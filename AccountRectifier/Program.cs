@@ -7,6 +7,7 @@ namespace AccountRectifier
         static void Main(string[] args)
         {
             Console.WriteLine("This is a CyberTitan GFW Test");
+            Console.ReadKey();
         }
     }
 }
